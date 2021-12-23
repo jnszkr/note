@@ -1,35 +1,22 @@
 package main
 
 import (
-	"bytes"
-	"log"
+	"flag"
 	"os"
-	"time"
 )
 
 func main() {
-	// if the file does not exist, create it, or append to the file
-	f, err := os.OpenFile(".notes", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	// read input
-	b := bytes.Buffer{}
-	b.WriteString(time.Now().Local().Format(time.RFC3339))
-	b.WriteString(" ")
-	for _, arg := range os.Args[1:] {
-		b.WriteString(arg)
-		b.WriteString(" ")
-	}
-	b.WriteString("\n")
+	var s string
 
-	// append input
-	_, err = f.Write(b.Bytes())
-	if err != nil {
-		log.Fatal(err)
-	}
+	flag.StringVar(&s, "s", "", "Search in notes.")
 
-	// close file
-	f.Close()
+	flag.Parse()
+
+	switch {
+	case len(s) > 0:
+		search(s)
+	default:
+		add(os.Args[1:])
+	}
 }
