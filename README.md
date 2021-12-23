@@ -32,3 +32,11 @@ To look at your notes you can do:
 2021-12-23T14:11:35+01:00 This is my first note that I am creating.
 2021-12-23T14:11:42+01:00 What a rainy day.
 ```
+
+To search in notes:
+
+```bash
+> note -s rainy
+/Users/jnszkr/go/src/note/.notes
+        2021-12-23T14:11:42+01:00 What a rainy day.
+```
