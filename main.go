@@ -2,7 +2,10 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
+
+	"github.com/jnszkr/note/searcher"
 )
 
 func main() {
@@ -15,7 +18,12 @@ func main() {
 
 	switch {
 	case len(s) > 0:
-		search(s)
+		currDir, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		sr := searcher.New(currDir, os.Stdout)
+		sr.Search(s)
 	default:
 		add(os.Args[1:])
 	}
