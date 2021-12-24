@@ -55,6 +55,10 @@ func searchIn(path string, s string) ([]string, error) {
 	return res, nil
 }
 
+var ignoredFiles = map[string]struct{}{
+	".git": {},
+}
+
 func files() ([]string, error) {
 	var fs []string
 
@@ -64,8 +68,9 @@ func files() ([]string, error) {
 	}
 
 	err = filepath.Walk(path, func(path string, f os.FileInfo, err error) error {
+		_, ignored := ignoredFiles[f.Name()]
 		switch {
-		case f.IsDir() && f.Name() == ".git":
+		case ignored:
 			return filepath.SkipDir
 		case !f.IsDir() && f.Name() == ".notes":
 			fs = append(fs, path)
