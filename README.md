@@ -1,6 +1,6 @@
 # note
 
-Simple cli that makes your thoughts captured at the moment.
+Simple cli that makes your thoughts captured in the moment.
 
 ## Install
 
