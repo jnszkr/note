@@ -37,15 +37,20 @@ func (s *searcher) Search(exp string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	exp = strings.ToLower(exp)
+
 	for _, path := range fs {
 		res, err := searchIn(path, exp)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Fprintln(s.out, s.topicDisplay(path))
-		for _, l := range res {
-			fmt.Fprintf(s.out, "\t%s\n", l)
+		if len(res) > 0 {
+			fmt.Fprintln(s.out, s.topicDisplay(path))
+			for _, l := range res {
+				fmt.Fprintf(s.out, "\t%s\n", l)
+			}
 		}
 	}
 }
