@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/jnszkr/note/color"
 )
 
 type Searcher interface {
@@ -66,15 +68,15 @@ func searchIn(path string, s string) ([]string, error) {
 	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
-	s = strings.ToLower(s)
 
 	res := make([]string, 0)
-	line := 1
 	for scanner.Scan() {
-		if strings.Contains(strings.ToLower(scanner.Text()), s) {
-			res = append(res, scanner.Text())
+		t := scanner.Text()
+		if strings.Contains(strings.ToLower(t), s) {
+			re := regexp.MustCompile(fmt.Sprintf("(?i)(%s)", s))
+			t = re.ReplaceAllString(t, color.Red("$1"))
+			res = append(res, t)
 		}
-		line++
 	}
 
 	if err := scanner.Err(); err != nil {

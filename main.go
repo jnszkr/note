@@ -2,8 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"github.com/jnszkr/note/color"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/jnszkr/note/searcher"
 )
@@ -23,8 +26,9 @@ func main() {
 			log.Fatal(err)
 		}
 		sr := searcher.New(currDir, os.Stdout)
-		sr.Search(s)
+		sr.Search(strings.ToLower(s))
 	default:
 		add(os.Args[1:])
+		fmt.Println(color.Red("msg") + " added")
 	}
 }
