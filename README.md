@@ -28,7 +28,7 @@ drwxr-xr-x  27 -  staff   864 Dec 23 14:01 ..
 To look at your notes you can do:
 
 ```bash
-> cat .notes
+> note
 2021-12-23T14:11:35+01:00 This is my first note that I am creating.
 2021-12-23T14:11:42+01:00 What a rainy day.
 ```
