@@ -1,4 +1,4 @@
-# note
+# note ![Testing](https://github.com/jnszkr/note/actions/workflows/test.yml/badge.svg)
 
 Simple cli that makes your thoughts captured in the moment.
 
