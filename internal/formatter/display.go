@@ -1,4 +1,4 @@
-package main
+package formatter
 
 import (
 	"bufio"
@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func display(path string) string {
+func Display(path string) string {
 	f, err := os.Open(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {

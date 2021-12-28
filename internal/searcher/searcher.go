@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/jnszkr/note/color"
+	"github.com/jnszkr/note/internal/color"
 )
 
 type Searcher interface {
