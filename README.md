@@ -5,7 +5,7 @@ Simple cli that makes your thoughts captured in the moment.
 ## Install
 
 ```
-go install github.com/jnszkr/note
+go install github.com/jnszkr/note/cmd/note
 ```
 
 ## Usage

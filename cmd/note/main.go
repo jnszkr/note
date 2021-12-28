@@ -7,7 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jnszkr/note/searcher"
+	"github.com/jnszkr/note/internal/appender"
+	"github.com/jnszkr/note/internal/formatter"
+	"github.com/jnszkr/note/internal/searcher"
 )
 
 func main() {
@@ -28,9 +30,9 @@ func main() {
 		sr := searcher.New(currDir, os.Stdout)
 		sr.Search(s)
 	case len(os.Args) > 1:
-		add(os.Args[1:])
+		appender.Append(os.Args[1:])
 	default:
 		path := filepath.Join(currDir, ".notes")
-		fmt.Println(display(path))
+		fmt.Println(formatter.Display(path))
 	}
 }

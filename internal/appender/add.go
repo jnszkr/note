@@ -1,4 +1,4 @@
-package main
+package appender
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func add(args []string) {
+func Append(args []string) {
 	// if the file does not exist, create it, or append to the file
 	f, err := os.OpenFile(".notes", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
