@@ -13,10 +13,11 @@ func Append(args []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer f.Close()
 
 	// read input
 	b := bytes.Buffer{}
-	b.WriteString(time.Now().Local().Format(time.RFC3339))
+	b.WriteString(time.Now().Format(time.RFC3339))
 	b.WriteString(" ")
 	for _, arg := range args {
 		b.WriteString(arg)
@@ -29,7 +30,4 @@ func Append(args []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// close file
-	f.Close()
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/jnszkr/note/internal/appender"
 	"github.com/jnszkr/note/internal/formatter"
+	"github.com/jnszkr/note/internal/reader"
 	"github.com/jnszkr/note/internal/searcher"
 )
 
@@ -27,12 +28,18 @@ func main() {
 
 	switch {
 	case len(s) > 0:
+		// search parameter provided
 		sr := searcher.New(currDir, os.Stdout)
 		sr.Search(s)
 	case len(os.Args) > 1:
 		appender.Append(os.Args[1:])
 	default:
+		// no arguments provided
 		path := filepath.Join(currDir, ".notes")
-		fmt.Println(formatter.Display(path))
+		r, err := reader.New(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(formatter.Format(r))
 	}
 }
