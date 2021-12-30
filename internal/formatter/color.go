@@ -1,4 +1,4 @@
-package color
+package formatter
 
 import (
 	"fmt"
