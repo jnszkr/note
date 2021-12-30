@@ -11,7 +11,7 @@ import (
 func TestSearcher(t *testing.T) {
 
 	t.Run("Searching for 'this'", func(t *testing.T) {
-		searchDir, err := filepath.Abs("../testdata")
+		searchDir, err := filepath.Abs("./testdata")
 		assert.NoError(t, err)
 		var buf bytes.Buffer
 
@@ -22,7 +22,7 @@ func TestSearcher(t *testing.T) {
 	})
 
 	t.Run("Searching for 'no match'", func(t *testing.T) {
-		searchDir, err := filepath.Abs("../testdata")
+		searchDir, err := filepath.Abs("./testdata")
 		assert.NoError(t, err)
 		var buf bytes.Buffer
 
@@ -33,7 +33,7 @@ func TestSearcher(t *testing.T) {
 	})
 
 	t.Run("Searching for movie related topics", func(t *testing.T) {
-		searchDir, err := filepath.Abs("../testdata")
+		searchDir, err := filepath.Abs("./testdata")
 		assert.NoError(t, err)
 		var buf bytes.Buffer
 
