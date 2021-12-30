@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/jnszkr/note/internal/color"
+	"github.com/jnszkr/note/internal/formatter"
 )
 
 type Searcher interface {
@@ -79,7 +79,7 @@ func searchIn(path string, s string) ([]string, error) {
 		t := scanner.Text()
 		if strings.Contains(strings.ToLower(t), s) {
 			re := regexp.MustCompile(fmt.Sprintf("(?i)(%s)", s))
-			t = re.ReplaceAllString(t, color.Red("$1"))
+			t = re.ReplaceAllString(t, formatter.Red("$1"))
 			res = append(res, t)
 		}
 	}
