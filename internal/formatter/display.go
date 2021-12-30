@@ -1,33 +1,45 @@
 package formatter
 
 import (
-	"bufio"
-	"errors"
-	"log"
-	"os"
-	"strings"
+	"bytes"
+	"time"
+
+	"github.com/jnszkr/note/internal/reader"
 )
 
-func Display(path string) string {
-	f, err := os.Open(path)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return ""
+func Format(r *reader.NoteReader) string {
+	d := dateFormat{}
+
+	buf := bytes.Buffer{}
+	for r.Next() {
+		t, msg, err := r.Read()
+		if err != nil {
+			continue
 		}
-		log.Fatal(err)
-	}
-	defer f.Close()
 
-	scanner := bufio.NewScanner(f)
+		dateStr := d.format(t)
 
-	res := make([]string, 0)
-	for scanner.Scan() {
-		t := scanner.Text()
-		res = append(res, t)
+		buf.WriteString(dateStr)
+		buf.WriteString(" ")
+		buf.WriteString(msg)
+		buf.WriteString("\n")
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+	return buf.String()
+}
+
+type dateFormat struct {
+	last *time.Time
+}
+
+func (d *dateFormat) format(t *time.Time) string {
+	if d.last == nil {
+		d.last = t
+		return t.Format("2006-01-02 15:04:05")
 	}
-	return strings.Join(res, "\n")
+	if t.Year() == d.last.Year() && t.YearDay() == d.last.YearDay() {
+		return t.Format("           15:04:05")
+	}
+	d.last = t
+	return t.Format("2006-01-02 15:04:05")
 }
