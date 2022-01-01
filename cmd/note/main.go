@@ -6,11 +6,12 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
-	"github.com/jnszkr/note/internal/appender"
 	"github.com/jnszkr/note/internal/formatter"
 	"github.com/jnszkr/note/internal/reader"
 	"github.com/jnszkr/note/internal/searcher"
+	"github.com/jnszkr/note/internal/writer"
 )
 
 func main() {
@@ -32,7 +33,15 @@ func main() {
 		sr := searcher.New(currDir, os.Stdout)
 		sr.Search(s)
 	case len(os.Args) > 1:
-		appender.Append(os.Args[1:])
+		w, err := writer.New(filepath.Join(currDir, ".notes"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer w.Close()
+		err = w.WriteNote(strings.Join(os.Args[1:], " "))
+		if err != nil {
+			log.Fatal(err)
+		}
 	default:
 		// no arguments provided
 		path := filepath.Join(currDir, ".notes")
