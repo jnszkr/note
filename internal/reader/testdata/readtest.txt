@@ -1,5 +1,5 @@
 2021-12-29T09:59:25+01:00 Test message 1 
 2021-12-29T09:59:29+01:00 Test message 2 
 2021-12-29T09:59:34+01:00
-invalid line 2021-12-29T10:21:00+01:00 Test message 4 
+invalid date 2021-12-29T10:21:00+01:00 Test message 4
 2021-12-29T10:23:14+01:00 Test message 4 

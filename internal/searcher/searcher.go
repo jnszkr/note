@@ -1,7 +1,6 @@
 package searcher
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -9,6 +8,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
+
+	"github.com/jnszkr/note/internal/reader"
 
 	"github.com/jnszkr/note/internal/formatter"
 )
@@ -48,9 +50,7 @@ func (s *searcher) Search(exp string) {
 
 		if len(res) > 0 {
 			fmt.Fprintln(s.out, s.topicDisplay(path))
-			for _, l := range res {
-				fmt.Fprintf(s.out, "\t%s\n", l)
-			}
+			fmt.Fprint(s.out, res)
 		}
 	}
 }
@@ -65,28 +65,19 @@ func (s *searcher) topicDisplay(path string) string {
 	return " • " + strings.Join(topics, " • ")
 }
 
-func searchIn(path string, s string) ([]string, error) {
-	f, err := os.Open(path)
+func searchIn(path string, s string) (string, error) {
+	r, err := reader.NewWith(path, func(t *time.Time, note string) bool {
+		return strings.Contains(strings.ToLower(note), s)
+	})
 	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
-
-	res := make([]string, 0)
-	for scanner.Scan() {
-		t := scanner.Text()
-		if strings.Contains(strings.ToLower(t), s) {
-			re := regexp.MustCompile(fmt.Sprintf("(?i)(%s)", s))
-			t = re.ReplaceAllString(t, formatter.Red("$1"))
-			res = append(res, t)
-		}
+		return "", err
 	}
 
-	if err := scanner.Err(); err != nil {
-		return res, err
-	}
+	res := formatter.FormatWith(r, "   ")
+	// TODO: add this to formatter
+	re := regexp.MustCompile(fmt.Sprintf("(?i)(%s)", s))
+	res = re.ReplaceAllString(res, formatter.Red("$1"))
+
 	return res, nil
 }
 
