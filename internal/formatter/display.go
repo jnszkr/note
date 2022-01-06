@@ -3,22 +3,26 @@ package formatter
 import (
 	"bytes"
 	"time"
-
-	"github.com/jnszkr/note/internal/reader"
 )
 
-func Format(r *reader.NoteReader) string {
+type noteReader interface {
+	Next() bool
+	ReadNote() (*time.Time, string, error)
+}
+
+func FormatWith(r noteReader, prefix string) string {
 	d := dateFormat{}
 
 	buf := bytes.Buffer{}
 	for r.Next() {
-		t, msg, err := r.Read()
+		t, msg, err := r.ReadNote()
 		if err != nil {
 			continue
 		}
 
 		dateStr := d.format(t)
 
+		buf.WriteString(prefix)
 		buf.WriteString(dateStr)
 		buf.WriteString(" ")
 		buf.WriteString(msg)
@@ -26,6 +30,10 @@ func Format(r *reader.NoteReader) string {
 	}
 
 	return buf.String()
+}
+
+func Format(r noteReader) string {
+	return FormatWith(r, "")
 }
 
 type dateFormat struct {
