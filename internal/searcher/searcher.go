@@ -90,6 +90,9 @@ func (s *searcher) files() ([]string, error) {
 	var fs []string
 
 	err := filepath.Walk(s.path, func(path string, f os.FileInfo, err error) error {
+		if err != nil {
+			return filepath.SkipDir
+		}
 		_, ignored := ignoredFiles[f.Name()]
 		switch {
 		case ignored:
