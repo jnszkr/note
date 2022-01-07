@@ -35,7 +35,7 @@ type searcher struct {
 // path recursively and tries to find the expression in each one.
 // The results are written to io.Writer.
 func (s *searcher) Search(exp string) {
-	fs, err := s.files()
+	fs, err := s.files(s.path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -90,6 +90,9 @@ func (s *searcher) files() ([]string, error) {
 	var fs []string
 
 	err := filepath.Walk(s.path, func(path string, f os.FileInfo, err error) error {
+		if err != nil {
+			return filepath.SkipDir
+		}
 		_, ignored := ignoredFiles[f.Name()]
 		switch {
 		case ignored:
