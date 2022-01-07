@@ -19,8 +19,8 @@ func main() {
 	var s string
 	var r bool
 
-	flag.StringVar(&s, "s", "", "Search in notes.")
-	flag.BoolVar(&r, "r", false, "Search recursively. Can be used with -s")
+	flag.StringVar(&s, "s", "", "Search in notes")
+	flag.BoolVar(&r, "r", false, "Search recursively")
 
 	flag.Parse()
 

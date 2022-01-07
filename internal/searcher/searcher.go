@@ -77,11 +77,7 @@ func searchIn(path string, s string) (string, error) {
 	}
 
 	res := formatter.FormatWith(r, "   ")
-	// TODO: add this to formatter
-	re := regexp.MustCompile(fmt.Sprintf("(?i)(%s)", s))
-	res = re.ReplaceAllString(res, formatter.Red("$1"))
-
-	return res, nil
+	return formatter.Highlight(res, s, formatter.Red), nil
 }
 
 // ignoredFiles
