@@ -16,7 +16,7 @@ import (
 )
 
 type Searcher interface {
-	Search(s string)
+	Search(s string, recursive bool)
 }
 
 func New(path string, out io.Writer) Searcher {
@@ -34,8 +34,8 @@ type searcher struct {
 // Search finds all the files that are called `.notes` in the current
 // path recursively and tries to find the expression in each one.
 // The results are written to io.Writer.
-func (s *searcher) Search(exp string) {
-	fs, err := s.files()
+func (s *searcher) Search(exp string, recursive bool) {
+	fs, err := s.files(recursive)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,6 +70,9 @@ func searchIn(path string, s string) (string, error) {
 		return strings.Contains(strings.ToLower(note), s)
 	})
 	if err != nil {
+		if _, ok := err.(*os.PathError); ok {
+			return "", nil // return with nil if file does not exist
+		}
 		return "", err
 	}
 
@@ -86,11 +89,16 @@ var ignoredFiles = map[string]struct{}{
 	".git": {},
 }
 
-func (s *searcher) files() ([]string, error) {
+func (s *searcher) files(recursive bool) ([]string, error) {
 	var fs []string
 
+	if !recursive {
+		p, _ := filepath.Abs(filepath.Join(s.path, ".notes"))
+		fs = append(fs, p)
+		return fs, nil
+	}
 	err := filepath.Walk(s.path, func(path string, f os.FileInfo, err error) error {
-		if err != nil {
+		if err != nil || f == nil {
 			return filepath.SkipDir
 		}
 		_, ignored := ignoredFiles[f.Name()]
