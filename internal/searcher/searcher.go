@@ -75,6 +75,7 @@ func searchIn(path string, s string) (string, error) {
 		}
 		return "", err
 	}
+	defer r.Close()
 
 	res := formatter.FormatWith(r, "   ")
 	return formatter.Highlight(res, s, formatter.Red), nil
