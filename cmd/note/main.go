@@ -35,7 +35,7 @@ func main() {
 		sr := searcher.New(currDir, os.Stdout)
 		sr.Search(s, r)
 	case len(os.Args) > 1:
-		w, err := writer.New(filepath.Join(currDir, ".notes"))
+		w, err := writer.New(filepath.Join(currDir, searcher.FileName))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -46,7 +46,7 @@ func main() {
 		}
 	default:
 		// no arguments provided
-		path := filepath.Join(currDir, ".notes")
+		path := filepath.Join(currDir, searcher.FileName)
 		r, err := reader.New(path)
 		if err != nil {
 			log.Fatal(err)
