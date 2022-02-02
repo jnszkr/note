@@ -5,17 +5,24 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/jnszkr/note/internal/files"
 
 	"github.com/jnszkr/note/internal/reader"
 
 	"github.com/jnszkr/note/internal/formatter"
 )
 
+const FileName = ".notes"
+
 type Searcher interface {
+	// Search finds all the files that are called `.notes` in the current
+	// path recursively and tries to find the expression in each one.
+	// The results are written to io.Writer.
 	Search(s string, recursive bool)
 }
 
@@ -23,40 +30,71 @@ func New(path string, out io.Writer) Searcher {
 	return &searcher{
 		path: path,
 		out:  out,
+		done: make(chan struct{}),
 	}
 }
 
 type searcher struct {
-	path string
-	out  io.Writer
+	path  string
+	out   io.Writer
+	stats stats
+	done  chan struct{}
 }
 
-// Search finds all the files that are called `.notes` in the current
-// path recursively and tries to find the expression in each one.
-// The results are written to io.Writer.
+type stats struct {
+	numberOfFiles int
+}
+
 func (s *searcher) Search(exp string, recursive bool) {
-	fs, err := s.files(recursive)
-	if err != nil {
-		log.Fatal(err)
+	ts := time.Now()
+	defer func() {
+		if os.Getenv("DEBUG") != "" {
+			fmt.Printf("Files found: %d\n", s.stats.numberOfFiles)
+			fmt.Printf("Time       : %v\n", time.Since(ts))
+		}
+	}()
+
+	var fs <-chan string
+	if recursive {
+		fs = files.RecursiveFind(s.path, FileName)
+	} else {
+		fs = files.Find(s.path, FileName)
 	}
 
 	exp = strings.ToLower(exp)
 
-	for _, path := range fs {
-		res, err := searchIn(path, exp)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if len(res) > 0 {
-			fmt.Fprintln(s.out, s.topicDisplay(path))
+	resultChan := make(chan string, 10)
+	go func() {
+		for res := range resultChan {
 			fmt.Fprint(s.out, res)
 		}
+		close(s.done)
+	}()
+
+	wg := &sync.WaitGroup{}
+	for path := range fs {
+		s.stats.numberOfFiles++
+
+		wg.Add(1)
+		go func(path string) {
+			defer wg.Done()
+
+			res, err := searchIn(path, exp)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if len(res) > 0 {
+				resultChan <- fmt.Sprintf("%s\n%s", s.topicDisplay(path), res)
+			}
+		}(path)
 	}
+	wg.Wait()
+	close(resultChan)
+	<-s.done
 }
 
 func (s *searcher) topicDisplay(path string) string {
-	re := regexp.MustCompilePOSIX(s.path + "/(.*)/.notes")
+	re := regexp.MustCompilePOSIX(s.path + "/(.*)/" + FileName)
 	subs := re.FindAllStringSubmatch(path, -1)
 	if subs == nil {
 		return " • "
@@ -79,35 +117,4 @@ func searchIn(path string, s string) (string, error) {
 
 	res := formatter.FormatWith(r, "   ")
 	return formatter.Highlight(res, s, formatter.Red), nil
-}
-
-// ignoredFiles
-var ignoredFiles = map[string]struct{}{
-	".git": {},
-}
-
-func (s *searcher) files(recursive bool) ([]string, error) {
-	var fs []string
-
-	if !recursive {
-		p, _ := filepath.Abs(filepath.Join(s.path, ".notes"))
-		fs = append(fs, p)
-		return fs, nil
-	}
-	err := filepath.Walk(s.path, func(path string, f os.FileInfo, err error) error {
-		if err != nil || f == nil {
-			return filepath.SkipDir
-		}
-		_, ignored := ignoredFiles[f.Name()]
-		switch {
-		case ignored:
-			return filepath.SkipDir
-		case !f.IsDir() && f.Name() == ".notes":
-			fs = append(fs, path)
-		}
-
-		return nil
-	})
-
-	return fs, err
 }
