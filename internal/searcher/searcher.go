@@ -5,11 +5,12 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/jnszkr/note/internal/files"
 
 	"github.com/jnszkr/note/internal/reader"
 
@@ -18,13 +19,10 @@ import (
 
 const FileName = ".notes"
 
-var debug = false
-
-func init() {
-	debug = os.Getenv("DEBUG") != ""
-}
-
 type Searcher interface {
+	// Search finds all the files that are called `.notes` in the current
+	// path recursively and tries to find the expression in each one.
+	// The results are written to io.Writer.
 	Search(s string, recursive bool)
 }
 
@@ -32,6 +30,7 @@ func New(path string, out io.Writer) Searcher {
 	return &searcher{
 		path: path,
 		out:  out,
+		done: make(chan struct{}),
 	}
 }
 
@@ -39,35 +38,37 @@ type searcher struct {
 	path  string
 	out   io.Writer
 	stats stats
+	done  chan struct{}
 }
 
 type stats struct {
 	numberOfFiles int
 }
 
-// Search finds all the files that are called `.notes` in the current
-// path recursively and tries to find the expression in each one.
-// The results are written to io.Writer.
 func (s *searcher) Search(exp string, recursive bool) {
 	ts := time.Now()
 	defer func() {
-		if debug {
+		if os.Getenv("DEBUG") != "" {
 			fmt.Printf("Files found: %d\n", s.stats.numberOfFiles)
 			fmt.Printf("Time       : %v\n", time.Since(ts))
 		}
 	}()
 
-	fs := s.files(recursive)
+	var fs <-chan string
+	if recursive {
+		fs = files.RecursiveFind(s.path, FileName)
+	} else {
+		fs = files.Find(s.path, FileName)
+	}
 
 	exp = strings.ToLower(exp)
 
 	resultChan := make(chan string, 10)
-	printDone := make(chan struct{})
 	go func() {
 		for res := range resultChan {
 			fmt.Fprint(s.out, res)
 		}
-		close(printDone)
+		close(s.done)
 	}()
 
 	wg := &sync.WaitGroup{}
@@ -89,7 +90,7 @@ func (s *searcher) Search(exp string, recursive bool) {
 	}
 	wg.Wait()
 	close(resultChan)
-	<-printDone
+	<-s.done
 }
 
 func (s *searcher) topicDisplay(path string) string {
@@ -116,56 +117,4 @@ func searchIn(path string, s string) (string, error) {
 
 	res := formatter.FormatWith(r, "   ")
 	return formatter.Highlight(res, s, formatter.Red), nil
-}
-
-// ignoredFiles
-var ignoredFiles = map[string]struct{}{
-	".git": {},
-}
-
-const fsChanSize = 100
-
-func (s *searcher) files(recursive bool) <-chan string {
-	fsChan := make(chan string, fsChanSize)
-
-	if recursive {
-		go func() {
-			err := s.walk(fsChan)
-			if err != nil {
-				log.Fatal(err)
-			}
-			close(fsChan)
-		}()
-		return fsChan
-	}
-
-	p, err := filepath.Abs(filepath.Join(s.path, FileName))
-	if err != nil {
-		log.Fatal(err)
-	}
-	fsChan <- p
-	close(fsChan)
-
-	return fsChan
-}
-
-func (s *searcher) walk(fsChan chan string) error {
-	err := filepath.Walk(s.path, func(path string, f os.FileInfo, err error) error {
-		if err != nil || f == nil {
-			return filepath.SkipDir
-		}
-		if f.IsDir() {
-			return nil
-		}
-		_, ignored := ignoredFiles[f.Name()]
-		switch {
-		case ignored:
-			return filepath.SkipDir
-		case !f.IsDir() && f.Name() == FileName:
-			fsChan <- path
-		}
-
-		return nil
-	})
-	return err
 }
