@@ -23,6 +23,9 @@ The notes will be stored in your current directory to `.notes` file.
 
 ```bash
 $ ls -al
+```
+
+```
 total 8
 drwxr-xr-x  3 -  staff   96 Jan  7 21:58 .
 drwxr-xr-x  3 -  staff   96 Jan  7 21:48 ..
@@ -33,6 +36,9 @@ To look at your notes you can do:
 
 ```bash
 $ note 
+```
+
+```
 2022-01-07 21:52:22 I have decided that I am going to do running.
            21:52:55 My goal is to finish a 5K
            21:53:06 But first I need a plan.
@@ -47,8 +53,11 @@ To search in notes:
 
 ```bash
 $ note -s "hard"
- • 
-   2022-01-10 09:12:18 Well, it was much harder!
+```
+
+```
+/Users/jnszkr/go/src/note/docs/example-notes/running/.notes
+    2022-01-10 09:12:18 Well, it was much harder!
 ```
 
 Recursive search would try to find all the notes in the subdirectories:
@@ -57,9 +66,12 @@ Recursive search would try to find all the notes in the subdirectories:
 $ cd ..
 $ note "This is the example folder"
 $ note -r -s is
- • 
-   2022-01-07 22:08:07 This is the example folder.
- • running
-   2022-01-07 21:52:55 My goal is to finish a 5K
-   2022-01-10 09:12:31 I keep this distance for a while now.
+```
+
+```
+/Users/oszkar/go/src/note/docs/example-notes/.notes
+    2022-01-07 22:08:07 This is the example folder.
+/Users/oszkar/go/src/note/docs/example-notes/running/.notes
+    2022-01-07 21:52:55 My goal is to finish a 5K
+    2022-01-10 09:12:31 I keep this distance for a while now.
 ```
