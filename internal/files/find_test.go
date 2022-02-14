@@ -8,11 +8,11 @@ import (
 )
 
 func TestFind(t *testing.T) {
-	fs := Find("./testdata", "somefile.txt")
+	fs := Find("./testdata", "somefile.txt", false)
 	filepath, next := <-fs
 	fi, err := os.Stat(filepath)
 	assert.NoError(t, err)
-	assert.NotContains(t, "lvl1/lvl2/lvl3", filepath)
+	assert.NotContains(t, "lvl01/lvl02/lvl03", filepath)
 	assert.Equal(t, "somefile.txt", fi.Name())
 	assert.False(t, fi.IsDir())
 	assert.True(t, next)
@@ -23,7 +23,7 @@ func TestFind(t *testing.T) {
 }
 
 func TestRecursiveFind(t *testing.T) {
-	fs := RecursiveFind("./testdata", "somefile.txt")
+	fs := Find("./testdata", "somefile.txt", true)
 	filepath, next := <-fs
 	fi, err := os.Stat(filepath)
 	assert.NoError(t, err)

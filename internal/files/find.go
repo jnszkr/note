@@ -13,9 +13,18 @@ var ignoredFiles = map[string]struct{}{
 
 const fsChanSize = 100
 
-func RecursiveFind(path, filename string) <-chan string {
-	fsChan := make(chan string, fsChanSize)
+func Find(path, filename string, recursive bool) <-chan string {
+	if !recursive {
+		fsChan := make(chan string, 1)
+		p, err := filepath.Abs(filepath.Join(path, filename))
+		if err == nil {
+			fsChan <- p
+		}
+		close(fsChan)
+		return fsChan
+	}
 
+	fsChan := make(chan string, fsChanSize)
 	go func() {
 		err := walk(path, filename, ignoredFiles, fsChan)
 		if err != nil {
@@ -23,20 +32,6 @@ func RecursiveFind(path, filename string) <-chan string {
 		}
 		close(fsChan)
 	}()
-
-	return fsChan
-}
-
-func Find(path, filename string) <-chan string {
-	fsChan := make(chan string, 1)
-
-	p, err := filepath.Abs(filepath.Join(path, filename))
-	if err != nil {
-		log.Fatal(err)
-	}
-	fsChan <- p
-	close(fsChan)
-
 	return fsChan
 }
 
