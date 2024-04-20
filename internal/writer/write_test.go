@@ -46,7 +46,7 @@ func TestNoteWriter_WriteNote(t *testing.T) {
 	assert.NoError(t, err)
 	err = w.WriteNote(note)
 	assert.NoError(t, err)
-	w.Close()
+	assert.NoError(t, w.Close())
 
 	file, err := os.Open("./.notes")
 	assert.NoError(t, err)

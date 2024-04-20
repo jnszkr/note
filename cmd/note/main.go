@@ -53,7 +53,9 @@ func write(currDir string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer w.Close()
+	defer func(w *writer.NoteWriter) {
+		_ = w.Close()
+	}(w)
 	err = w.WriteNote(strings.Join(os.Args[1:], " "))
 	if err != nil {
 		log.Fatal(err)
